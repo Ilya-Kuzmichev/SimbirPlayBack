@@ -1,0 +1,11 @@
+{
+  "require": {
+    "slim/slim": "3.*",
+    "slim/php-view": "^3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "action\\": "app/action/"
+    }
+  }
+}
