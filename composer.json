@@ -1,11 +1,15 @@
 {
   "require": {
     "slim/slim": "3.*",
-    "slim/php-view": "^3.2"
+    "lulco/phoenix": "^2.2",
+    "illuminate/database": "^8.83",
+    "respect/validation": "^2.2"
   },
   "autoload": {
     "psr-4": {
-      "action\\": "app/action/"
+      "actions\\": "app/actions/",
+      "models\\": "app/models/",
+      "helpers\\": "app/helpers/"
     }
   }
 }

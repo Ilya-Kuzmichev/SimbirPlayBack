@@ -1,0 +1,27 @@
+{
+  "log_table_name": "my_phoenix_log",
+  "migration_dirs": {
+    "dir": "%%ACTUAL_DIR%%/migration"
+  },
+  "environments": {
+    "local": {
+      "adapter": "mysql",
+      "host": "mysql_container_simbir",
+      "username": "root",
+      "password": "password",
+      "db_name": "sait",
+      "charset": "UTF8",
+      "collation": "utf8_general_ci"
+    },
+    "production": {
+      "adapter": "mysql",
+      "host": "localhost",
+      "username": "u1782472_default",
+      "password": "Bq1T2qVITfs1Lr74",
+      "db_name": "u1782472_default",
+      "charset": "UTF8",
+      "collation": "utf8_general_ci"
+    }
+  },
+  "default_environment": "local"
+}
