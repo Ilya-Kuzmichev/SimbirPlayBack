@@ -25,6 +25,25 @@ class UserAction
         $this->db = $container['db'];
     }
 
+    public function authentication(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $login = $request->getParam('login');
+        $password = $request->getParam('password');
+        $user = $this->db->table((new User())->getTable())->where('login', $login)->get(['id', 'name', 'surname', 'password'])->shift();
+        if (empty($user)) {
+            return $returnResponse->errorResponse('Неправильный логин или пароль');
+        }
+        if (password_verify($password, $user->password) !== true) {
+            return $returnResponse->errorResponse('Неправильный логин или пароль');
+        }
+        return $returnResponse->successResponse([
+            'id' => $user->id,
+            'name' => $user->name,
+            'surname' => $user->surname,
+        ]);
+    }
+
     public function list(Request $request, Response $response, $args)
     {
         $returnResponse = new ReturnedResponse($response);

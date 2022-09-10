@@ -31,6 +31,7 @@ $app->get('/rating', \actions\RatingAction::class . ':list');
 
 $app->get('/departament/list', \actions\DepartamentAction::class . ':list');
 
+$app->get('/user/authentication', \actions\UserAction::class . ':authentication');
 $app->get('/user/list', \actions\UserAction::class . ':list');
 $app->get('/user/info/{id}', \actions\UserAction::class . ':info');
 $app->post('/user/create-stimulus/{id}', \actions\UserAction::class . ':createStimulus');
