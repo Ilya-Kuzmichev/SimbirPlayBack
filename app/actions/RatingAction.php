@@ -33,7 +33,7 @@ class RatingAction
         foreach ($users as $index => $user) {
             $users[$index] = (array)$user;
             $users[$index]['departament'] = $departamentList[(int)$user->departament_id] ?? null;
-            $users[$index]['avatar'] = (new Server())->getHost() . '/images/' . $user->id . '.jpg';
+            $users[$index]['avatar'] = (new Server())->getHost() . '/images/user/' . $user->id . '.jpg';
         }
         return $returnResponse->successResponse($users);
     }

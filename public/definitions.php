@@ -3,6 +3,7 @@
 $container = $app->getContainer();
 $container['config'] = require_once 'config.php';
 $container['settings']['displayErrorDetails'] = true;
+$container['uploadDir'] = __DIR__ . '/images/';
 
 $container['db'] = function ($container) {
     $capsule = new \Illuminate\Database\Capsule\Manager;
@@ -39,3 +40,4 @@ $app->post('/promo/create', \actions\PromoAction::class . ':create');
 
 $app->get('/merch/list', \actions\MerchAction::class . ':list');
 $app->post('/merch/create', \actions\MerchAction::class . ':create');
+$app->post('/merch/buy/{id}', \actions\MerchAction::class . ':buy');

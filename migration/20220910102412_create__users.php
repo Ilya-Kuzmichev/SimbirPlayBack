@@ -58,7 +58,7 @@ final class Create_users extends AbstractMigration
                 'email' => 'aleksandra.dvoinina@simbirsoft.com',
                 'departament_id' => 2,
             ],            [
-                'external_id' => 1,
+                'external_id' => 5,
                 'name' => 'Дмитрий',
                 'surname' => 'Павловский',
                 'login' => 'dmitrii',
