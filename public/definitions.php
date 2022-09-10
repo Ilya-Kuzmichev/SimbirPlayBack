@@ -28,8 +28,11 @@ $container['phpErrorHandler'] = function ($container) {
 
 $app->get('/rating', \actions\RatingAction::class . ':list');
 
+$app->get('/departament/list', \actions\DepartamentAction::class . ':list');
+
 $app->get('/user/list', \actions\UserAction::class . ':list');
-$app->post('/user/create-stimulus', \actions\UserAction::class . ':createStimulus');
+$app->get('/user/info/{id}', \actions\UserAction::class . ':info');
+$app->post('/user/create-stimulus/{id}', \actions\UserAction::class . ':createStimulus');
 
 $app->get('/promo/list', \actions\PromoAction::class . ':list');
 $app->post('/promo/create', \actions\PromoAction::class . ':create');

@@ -3,6 +3,7 @@
 namespace actions;
 
 use helpers\ReturnedResponse;
+use helpers\Server;
 use models\Promo;
 use models\Stimulus;
 use Respect\Validation\Validator;
@@ -24,17 +25,41 @@ class UserAction
 
     public function list(Request $request, Response $response, $args)
     {
-        $users = $this->db->table((new User())->getTable())->get(['id', 'name', 'surname'])->all();
-        return $response->withJson($users);
+        $returnResponse = new ReturnedResponse($response);
+        $dbRequest = $this->db->table((new User())->getTable());
+        if ($departamentId = $request->getParam('departamentId')) {
+            $dbRequest = $dbRequest->where('departament_id', $departamentId);
+        }
+        $users = $dbRequest->get(['id', 'name', 'surname'])->all();
+        return $returnResponse->successResponse($users);
+    }
+
+    public function info(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $id = $args['id'] ?? null;
+        $user = $this->db->table((new User())->getTable())->where('id', $id)->get()->shift();
+        if (empty($user)) {
+            return $returnResponse->errorResponse('Такого пользователя не существует');
+        }
+        $tablePromo = (new Promo())->getTable();
+        $tableStimulus = (new Stimulus())->getTable();
+        $stimulus = $this->container['db']::select("SELECT p.name, s.balls, s.comment, DATE_FORMAT(s.date, '%d.%m.%Y') AS date FROM {$tableStimulus} s INNER JOIN {$tablePromo} p ON s.promo_id = p.id WHERE s.user_id = {$id} ORDER BY s.date");
+        return $returnResponse->successResponse([
+            'name' => $user->name,
+            'surname' => $user->surname,
+            'avatar' => (new Server())->getHost() . '/images/' . $user->id . '.jpg',
+            'stimulus' => $stimulus,
+        ]);
     }
 
     public function createStimulus(Request $request, Response $response, $args)
     {
         $returnResponse = new ReturnedResponse($response);
-        $userId = $request->getParam('userId');
+        $id = $args['id'] ?? null;
         $giverId = $request->getParam('giverId');
         $promoId = $request->getParam('promoId');
-        if (!$this->db->table((new User())->getTable())->where('id', $userId)->get()->shift()) {
+        if (!$this->db->table((new User())->getTable())->where('id', $id)->get()->shift()) {
             return $returnResponse->errorResponse('Такого пользователя не существует');
         }
         if (!$this->db->table((new User())->getTable())->where('id', $giverId)->get()->shift()) {
@@ -44,14 +69,16 @@ class UserAction
             return $returnResponse->errorResponse('Такого поощрения не существует');
         }
         $attributes = [
-            'user_id' => $userId,
+            'user_id' => $id,
             'promo_id' => $promoId,
             'giver_id' => $promoId,
             'balls' => $request->getParam('balls'),
+            'comment' => $request->getParam('comment')??'',
         ];
         $stimulus = new Stimulus();
         if ($errors = $this->container->validator->validate($attributes, [
-            'balls' => Validator::noWhitespace()->intVal()->between(0, 10000),
+            'balls' => Validator::noWhitespace()->intVal()->between(1, 10000),
+            'comment' => Validator::stringType()->length(null, 255),
         ])) {
             return $returnResponse->errorsResponse($errors);
         }

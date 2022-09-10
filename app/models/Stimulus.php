@@ -11,5 +11,5 @@ class Stimulus extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['user_id', 'giver_id', 'balls', 'promo_id'];
+    protected $fillable = ['user_id', 'giver_id', 'balls', 'promo_id', 'comment'];
 }

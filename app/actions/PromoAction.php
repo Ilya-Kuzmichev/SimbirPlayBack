@@ -2,6 +2,7 @@
 
 namespace actions;
 
+use helpers\ReturnedResponse;
 use models\Promo;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -19,12 +20,14 @@ class PromoAction
 
     public function list(Request $request, Response $response, $args)
     {
-        $merch = $this->container['db']->table((new Promo())->getTable())->get()->all();
-        return $response->withJson($merch);
+        $returnResponse = new ReturnedResponse($response);
+        $merch = $this->container['db']->table((new Promo())->getTable())->get(['id', 'name', 'default_rating as defaultRating'])->all();
+        return $returnResponse->successResponse($merch);
     }
 
     public function create(Request $request, Response $response, $args)
     {
+        $returnResponse = new ReturnedResponse($response);
         $attributes = [
             'name' => $request->getParam('name'),
             'default_rating' => $request->getParam('defaultRating'),
@@ -34,17 +37,12 @@ class PromoAction
             'name' => Validator::noWhitespace()->notEmpty()->stringType()->length(1, 255),
             'default_rating' => Validator::noWhitespace()->intVal()->between(0, 10000),
         ])) {
-            return $response->withJson([
-                'success' => true,
-                'errors' => $errors,
-            ]);
+            return $returnResponse->errorsResponse($errors);
         }
         $promo->fill($attributes);
         if ($promo->save()) {
-            return $response->withJson([
-                'success' => true,
-                'errors' => [],
-            ]);
+            return $returnResponse->successResponse();
         }
+        return $returnResponse->saveErrorResponse();
     }
 }

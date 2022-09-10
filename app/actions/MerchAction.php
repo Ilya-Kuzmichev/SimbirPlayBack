@@ -2,6 +2,7 @@
 
 namespace actions;
 
+use helpers\ReturnedResponse;
 use models\Merch;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -19,12 +20,14 @@ class MerchAction
 
     public function list(Request $request, Response $response, $args)
     {
-        $merch = $this->container['db']->table((new Merch())->getTable())->get()->all();
-        return $response->withJson($merch);
+        $returnResponse = new ReturnedResponse($response);
+        $merch = $this->container['db']->table((new Merch())->getTable())->get(['id', 'name', 'price'])->all();
+        return $returnResponse->successResponse($merch);
     }
 
     public function create(Request $request, Response $response, $args)
     {
+        $returnResponse = new ReturnedResponse($response);
         $attributes = [
             'name' => $request->getParam('name'),
             'price' => $request->getParam('price'),
@@ -34,17 +37,12 @@ class MerchAction
             'name' => Validator::noWhitespace()->notEmpty()->stringType()->length(1, 255),
             'price' => Validator::noWhitespace()->intVal()->between(0, 10000),
         ])) {
-            return $response->withJson([
-                'success' => false,
-                'errors' => $errors,
-            ]);
+            return $returnResponse->errorsResponse($errors);
         }
         $merch->fill($attributes);
         if ($merch->save()) {
-            return $response->withJson([
-                'success' => true,
-                'errors' => [],
-            ]);
+            return $returnResponse->successResponse();
         }
+        return $returnResponse->saveErrorResponse();
     }
 }

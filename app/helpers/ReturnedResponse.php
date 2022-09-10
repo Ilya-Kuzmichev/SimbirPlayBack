@@ -13,18 +13,21 @@ class ReturnedResponse
         $this->response = $response;
     }
 
-    public function successResponse(array $data = []): Response
+    public function successResponse(array $result = []): Response
     {
-        $data['success'] = true;
-        $data['errors'] = [];
-        return $this->response->withJson($data);
+        return $this->returnJSON([
+            'success' => true,
+            'errors' => [],
+            'result' => $result,
+        ]);
     }
 
     public function errorsResponse(array $errors): Response
     {
-        $data['success'] = true;
-        $data['errors'] = $errors;
-        return $this->response->withJson($data);
+        return $this->returnJSON([
+            'success' => false,
+            'errors' => $errors,
+        ]);
     }
 
     public function errorResponse(string $error): Response
@@ -35,5 +38,13 @@ class ReturnedResponse
     public function saveErrorResponse(): Response
     {
         return $this->errorResponse('Ошибка сохранения');
+    }
+
+    private function returnJSON(array $data)
+    {
+        $response = $this->response
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Credentials', true);
+        return $response->withJson($data);
     }
 }
