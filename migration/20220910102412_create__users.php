@@ -11,7 +11,7 @@ final class Create_users extends AbstractMigration
         $departamentTable = (new \models\Departament())->getTable();
         $userTable = (new \models\User())->getTable();
         $departaments = [
-            1 => 'Backend',
+            1 => 'Web',
             2 => 'Frontend',
             3 => 'Аккаунтинг',
             4 => 'Аналитика',
