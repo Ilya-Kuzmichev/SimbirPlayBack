@@ -34,7 +34,7 @@ class PromoAction
         ];
         $promo = new Promo();
         if ($errors = $this->container->validator->validate($attributes, [
-            'name' => Validator::noWhitespace()->notEmpty()->stringType()->length(1, 255),
+            'name' => Validator::notEmpty()->stringType()->length(1, 255),
             'default_rating' => Validator::noWhitespace()->intVal()->between(0, 10000),
         ])) {
             return $returnResponse->errorsResponse($errors);

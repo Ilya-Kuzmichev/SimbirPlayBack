@@ -1,5 +1,9 @@
 <?php
 
+use helpers\ReturnedResponse;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
 $container = $app->getContainer();
 $container['config'] = require_once 'config.php';
 $container['settings']['displayErrorDetails'] = true;
@@ -42,3 +46,16 @@ $app->post('/promo/create', \actions\PromoAction::class . ':create');
 $app->get('/merch/list', \actions\MerchAction::class . ':list');
 $app->post('/merch/create', \actions\MerchAction::class . ':create');
 $app->post('/merch/buy/{id}', \actions\MerchAction::class . ':buy');
+
+$app->options('/user/create-stimulus/{id}', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/merch/create', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/merch/buy/{id}', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/promo/create', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});

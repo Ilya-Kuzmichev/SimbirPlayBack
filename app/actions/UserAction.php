@@ -100,14 +100,16 @@ class UserAction
         if (!$this->db->table((new User())->getTable())->where('id', $giverId)->get()->shift()) {
             return $returnResponse->errorResponse('Такого пользователя не существует');
         }
-        if (!$this->db->table((new Promo())->getTable())->where('id', $promoId)->get()->shift()) {
+        $promo = $this->db->table((new Promo())->getTable())->where('id', $promoId)->get()->shift();
+        if (!$promo) {
             return $returnResponse->errorResponse('Такого поощрения не существует');
         }
+        $balls = $request->getParam('balls') ?? $promo->default_rating;
         $attributes = [
             'user_id' => $id,
             'promo_id' => $promoId,
             'giver_id' => $promoId,
-            'balls' => $request->getParam('balls'),
+            'balls' => $balls,
             'comment' => $request->getParam('comment') ?? '',
         ];
         $stimulus = new Stimulus();

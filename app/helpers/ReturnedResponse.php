@@ -40,10 +40,20 @@ class ReturnedResponse
         return $this->errorResponse('Ошибка сохранения');
     }
 
+    public static function responseForOptionsRequest()
+    {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization');
+        exit;
+    }
+
     private function returnJSON(array $data)
     {
         $response = $this->response
             ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
             ->withHeader('Access-Control-Allow-Credentials', true);
         return $response->withJson($data);
     }

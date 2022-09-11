@@ -28,11 +28,11 @@ class MerchAction
     public function list(Request $request, Response $response, $args)
     {
         $returnResponse = new ReturnedResponse($response);
-        $merchList = $this->db->table((new Merch())->getTable())->get(['id', 'name', 'price', 'picture'])->all();
+        $merchList = $this->db->table((new Merch())->getTable())->get(['id', 'name', 'price', 'picture'])->sortBy('price')->all();
         foreach ($merchList as $index => $merch) {
-            $merchList[$index]->picture = $merch->picture ? (new Server())->getHost() . '/images/merch/' . $merch->picture : '';
+            $merchList[$index]->picture = (new Server())->getHost() . '/images/merch/' . $merch->id . '.jpg';
         }
-        return $returnResponse->successResponse($merchList);
+        return $returnResponse->successResponse(array_values($merchList));
     }
 
     public function create(Request $request, Response $response, $args)
