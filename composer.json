@@ -9,7 +9,8 @@
     "psr-4": {
       "actions\\": "app/actions/",
       "models\\": "app/models/",
-      "helpers\\": "app/helpers/"
+      "helpers\\": "app/helpers/",
+      "modules\\": "app/modules/"
     }
   }
 }

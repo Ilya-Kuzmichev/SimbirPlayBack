@@ -47,6 +47,10 @@ $app->get('/merch/list', \actions\MerchAction::class . ':list');
 $app->post('/merch/create', \actions\MerchAction::class . ':create');
 $app->post('/merch/buy/{id}', \actions\MerchAction::class . ':buy');
 
+$app->get('/challenge/list', \actions\ChallengeAction::class . ':list');
+$app->get('/challenge/info/{id}', \actions\ChallengeAction::class . ':info');
+$app->post('/challenge/create', \actions\ChallengeAction::class . ':create');
+
 $app->options('/user/create-stimulus/{id}', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
@@ -57,5 +61,8 @@ $app->options('/merch/buy/{id}', function (Request $request, Response $response,
     ReturnedResponse::responseForOptionsRequest();
 });
 $app->options('/promo/create', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/user/challenge', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
