@@ -5,7 +5,6 @@ namespace actions;
 use helpers\ReturnedResponse;
 use helpers\Server;
 use models\Merch;
-use models\Promo;
 use models\Purchases;
 use models\Stimulus;
 use Respect\Validation\Validator;
@@ -30,7 +29,8 @@ class UserAction
         $returnResponse = new ReturnedResponse($response);
         $login = $request->getParam('login');
         $password = $request->getParam('password');
-        $user = $this->db->table((new User())->getTable())->where('login', $login)->get(['id', 'name', 'surname', 'password'])->shift();
+        $user = $this->db->table((new User())->getTable())->where('login', $login)
+            ->get(['id', 'name', 'surname', 'password', 'role_id', 'token'])->shift();
         if (empty($user)) {
             return $returnResponse->errorResponse('Неправильный логин или пароль');
         }
@@ -38,9 +38,10 @@ class UserAction
             return $returnResponse->errorResponse('Неправильный логин или пароль');
         }
         return $returnResponse->successResponse([
-            'id' => $user->id,
             'name' => $user->name,
             'surname' => $user->surname,
+            'token' => $user->token,
+            'isAdmin' => $user->role_id == User::ROLE_ADMIN,
         ]);
     }
 
@@ -64,10 +65,9 @@ class UserAction
             return $returnResponse->errorResponse('Такого пользователя не существует');
         }
         $tableMerch = (new Merch())->getTable();
-        $tablePromo = (new Promo())->getTable();
         $tableStimulus = (new Stimulus())->getTable();
         $tablePurchases = (new Purchases())->getTable();
-        $stimulus = $this->container['db']::select("SELECT p.name, s.balls, s.comment, DATE_FORMAT(s.date, '%d.%m.%Y') AS date FROM {$tableStimulus} s INNER JOIN {$tablePromo} p ON s.promo_id = p.id WHERE s.user_id = {$id} ORDER BY s.date");
+        $stimulus = [];//$this->container['db']::select("SELECT p.name, s.balls, s.comment, DATE_FORMAT(s.date, '%d.%m.%Y') AS date FROM {$tableStimulus} s INNER JOIN {$tablePromo} p ON s.promo_id = p.id WHERE s.user_id = {$id} ORDER BY s.date");
         $purchases = $this->container['db']::select("SELECT m.name, p.price FROM {$tablePurchases} p INNER JOIN {$tableMerch} m ON p.merch_id = m.id WHERE p.user_id = {$id}");
         $totalRating = 0;
         foreach ($stimulus as $stimulusRow) {

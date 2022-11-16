@@ -35,13 +35,13 @@ $app->get('/rating', \actions\RatingAction::class . ':list');
 
 $app->get('/departament/list', \actions\DepartamentAction::class . ':list');
 
-$app->get('/user/authentication', \actions\UserAction::class . ':authentication');
+$app->post('/user/authentication', \actions\UserAction::class . ':authentication');
 $app->get('/user/list', \actions\UserAction::class . ':list');
 $app->get('/user/info/{id}', \actions\UserAction::class . ':info');
 $app->post('/user/create-stimulus/{id}', \actions\UserAction::class . ':createStimulus');
 
-$app->get('/promo/list', \actions\PromoAction::class . ':list');
-$app->post('/promo/create', \actions\PromoAction::class . ':create');
+$app->get('/achievement/group-list', \actions\AchievementAction::class . ':groupList');
+$app->get('/achievement/list', \actions\AchievementAction::class . ':list');
 
 $app->get('/merch/list', \actions\MerchAction::class . ':list');
 $app->post('/merch/create', \actions\MerchAction::class . ':create');
@@ -60,9 +60,12 @@ $app->options('/merch/create', function (Request $request, Response $response, $
 $app->options('/merch/buy/{id}', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/promo/create', function (Request $request, Response $response, $args) {
+$app->options('/achievement/create', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
 $app->options('/user/challenge', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
+
+$app->post('/admin/achievement/create-group', \actions\admin\AchievementAction::class . ':createGroup');
+$app->post('/admin/achievement/create', \actions\admin\AchievementAction::class . ':create');

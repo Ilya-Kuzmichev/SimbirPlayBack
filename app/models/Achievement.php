@@ -4,9 +4,9 @@ namespace models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Promo extends Model
+class Achievement extends Model
 {
-    protected $table = 'promo';
+    protected $table = 'achievement';
 
     const CREATED_AT = null;
     const UPDATED_AT = null;
