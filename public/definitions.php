@@ -36,6 +36,7 @@ $app->get('/rating', \actions\RatingAction::class . ':list');
 $app->get('/departament/list', \actions\DepartamentAction::class . ':list');
 
 $app->post('/user/authentication', \actions\UserAction::class . ':authentication');
+$app->post('/user/search', \actions\UserAction::class . ':search');
 $app->get('/user/list', \actions\UserAction::class . ':list');
 $app->get('/user/info/{id}', \actions\UserAction::class . ':info');
 $app->post('/user/create-stimulus/{id}', \actions\UserAction::class . ':createStimulus');
@@ -51,6 +52,15 @@ $app->get('/challenge/list', \actions\ChallengeAction::class . ':list');
 $app->get('/challenge/info/{id}', \actions\ChallengeAction::class . ':info');
 $app->post('/challenge/create', \actions\ChallengeAction::class . ':create');
 
+$app->post('/admin/achievement/create-group', \actions\admin\AchievementAction::class . ':createGroup');
+$app->post('/admin/achievement/create', \actions\admin\AchievementAction::class . ':create');
+
+$app->options('/user/authentication', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/user/search', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
 $app->options('/user/create-stimulus/{id}', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
@@ -60,12 +70,9 @@ $app->options('/merch/create', function (Request $request, Response $response, $
 $app->options('/merch/buy/{id}', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/achievement/create', function (Request $request, Response $response, $args) {
+$app->options('/admin/achievement/create', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/user/challenge', function (Request $request, Response $response, $args) {
+$app->options('/admin/achievement/create-group', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-
-$app->post('/admin/achievement/create-group', \actions\admin\AchievementAction::class . ':createGroup');
-$app->post('/admin/achievement/create', \actions\admin\AchievementAction::class . ':create');

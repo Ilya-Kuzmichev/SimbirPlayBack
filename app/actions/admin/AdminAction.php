@@ -2,14 +2,8 @@
 
 namespace actions\admin;
 
-use Psr\Container\ContainerInterface;
+use actions\Action;
 
-class AdminAction
+class AdminAction extends Action
 {
-    protected $container;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
 }

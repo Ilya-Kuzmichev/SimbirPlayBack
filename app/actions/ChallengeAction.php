@@ -3,25 +3,15 @@
 namespace actions;
 
 use helpers\ReturnedResponse;
+use models\Achievement;
 use models\Challenge;
 use models\User;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Respect\Validation\Validator;
 
-class ChallengeAction
+class ChallengeAction extends Action
 {
-    private $container;
-    private $db;
-    private $validator;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->db = $container->db;
-        $this->validator = $container->validator;
-    }
 
     public function list(Request $request, Response $response, $args)
     {
@@ -35,8 +25,12 @@ class ChallengeAction
             $challengesParse[] = [
                 'id' => $challenge->id,
                 'name' => $challenge->name,
-                'startDate' => $challenge->start_date,
-                'endDate' => $challenge->end_date,
+                'startDate' => date('d.m.Y', strtotime($challenge->start_date)),
+                'endDate' => date('d.m.Y', strtotime($challenge->end_date)),
+                //TODO
+                'achievements' => 'Список достижений',
+                'balance' => 100,
+                'icon' => 'https://cdnn21.img.ria.ru/images/07e4/0a/1a/1581598772_0:489:2000:1614_1920x0_80_0_0_63a9806e0d87c17481dc578721e4e99d.jpg.webp',
                 'responsible' => $responsible ? $responsible->name : null,
             ];
         }
@@ -53,12 +47,27 @@ class ChallengeAction
         }
         $responsible = $this->db->table((new User())->getTable())
             ->get()->where('id', $challenge->responsible_id)->shift();
+        $achievementParse = [];
+        $achievements = $this->db->table((new Achievement())->getTable())
+            ->get()->where('challenge_id', $challenge->id)->all();
+        foreach ($achievements as $achievement) {
+            $achievementParse[] = [
+                'id' => $achievement->id,
+                'name' => $achievement->name,
+                'min' => $achievement->min_price,
+                'max' => $achievement->max_price,
+            ];
+        }
         return $returnResponse->successResponse([
             'name' => $challenge->name,
             'description' => $challenge->description,
-            'startDate' => $challenge->start_date,
-            'endDate' => $challenge->end_date,
-            'budget' => $challenge->budget,
+            'startDate' => date('d.m.Y', strtotime($challenge->start_date)),
+            'endDate' => date('d.m.Y', strtotime($challenge->end_date)),
+            //TODO
+            'achievements' => $achievementParse,
+            'balance' => 100,
+            'department' => 'Направление',
+            'icon' => 'https://cdnn21.img.ria.ru/images/07e4/0a/1a/1581598772_0:489:2000:1614_1920x0_80_0_0_63a9806e0d87c17481dc578721e4e99d.jpg.webp',
             'responsible' => $responsible ? $responsible->name : null,
         ]);
     }

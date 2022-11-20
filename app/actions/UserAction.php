@@ -9,20 +9,11 @@ use models\Purchases;
 use models\Stimulus;
 use Respect\Validation\Validator;
 use models\User;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class UserAction
+class UserAction extends Action
 {
-    private $container;
-    private $db;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->db = $container['db'];
-    }
 
     public function authentication(Request $request, Response $response, $args)
     {
@@ -38,11 +29,25 @@ class UserAction
             return $returnResponse->errorResponse('Неправильный логин или пароль');
         }
         return $returnResponse->successResponse([
+            'id' => $user->id,
             'name' => $user->name,
             'surname' => $user->surname,
             'token' => $user->token,
             'isAdmin' => $user->role_id == User::ROLE_ADMIN,
         ]);
+    }
+
+    public function search(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $name = $request->getParam('name');
+        if (mb_strlen($name, 'UTF-8') < 3) {
+            return $returnResponse->errorResponse('Строка менее 3 символов');
+        }
+        $users = $this->db->table((new User())->getTable())
+            ->where('name', 'LIKE', "{$name}%")->orWhere('surname', 'LIKE', "{$name}%")
+            ->get(['id', 'name', 'surname'])->all();
+        return $returnResponse->successResponse($users);
     }
 
     public function list(Request $request, Response $response, $args)

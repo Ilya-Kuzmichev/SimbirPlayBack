@@ -11,5 +11,5 @@ class Achievement extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['name', 'default_rating'];
+    protected $fillable = ['name', 'challenge_id', 'group_id', 'min_price', 'max_price'];
 }
