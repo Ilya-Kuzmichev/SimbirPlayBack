@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use Phoenix\Migration\AbstractMigration;
 
-final class Create_table_departament extends AbstractMigration
+final class Create_table_department extends AbstractMigration
 {
     protected function up(): void
     {
-        $table = (new \models\Departament())->getTable();
+        $table = (new \models\Department())->getTable();
         $this->execute("CREATE TABLE `{$table}` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `name` varchar(255) NOT NULL,
@@ -19,7 +19,7 @@ final class Create_table_departament extends AbstractMigration
 
     protected function down(): void
     {
-        $this->table((new \models\Departament())->getTable())
+        $this->table((new \models\Department())->getTable())
             ->drop();
     }
 }

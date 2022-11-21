@@ -33,16 +33,16 @@ $container['phpErrorHandler'] = function ($container) {
 
 $app->get('/rating', \actions\RatingAction::class . ':list');
 
-$app->get('/departament/list', \actions\DepartamentAction::class . ':list');
+$app->get('/department/list', \actions\DepartmentAction::class . ':list');
 
 $app->post('/user/authentication', \actions\UserAction::class . ':authentication');
 $app->post('/user/search', \actions\UserAction::class . ':search');
 $app->get('/user/list', \actions\UserAction::class . ':list');
 $app->get('/user/info/{id}', \actions\UserAction::class . ':info');
-$app->post('/user/create-stimulus/{id}', \actions\UserAction::class . ':createStimulus');
 
 $app->get('/achievement/group-list', \actions\AchievementAction::class . ':groupList');
 $app->get('/achievement/list', \actions\AchievementAction::class . ':list');
+$app->post('/achievement/accrue-bonuses', \actions\AchievementAction::class . ':accrueBonuses');
 
 $app->get('/merch/list', \actions\MerchAction::class . ':list');
 $app->post('/merch/create', \actions\MerchAction::class . ':create');
@@ -58,10 +58,10 @@ $app->post('/admin/achievement/create', \actions\admin\AchievementAction::class 
 $app->options('/user/authentication', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/user/search', function (Request $request, Response $response, $args) {
+$app->options('/achievement/accrue-bonuses', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/user/create-stimulus/{id}', function (Request $request, Response $response, $args) {
+$app->options('/user/search', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
 $app->options('/merch/create', function (Request $request, Response $response, $args) {

@@ -18,7 +18,7 @@ final class Create_table_user extends AbstractMigration
                 `password` varchar(255) NOT NULL,
                 `email` varchar(255),
                 `active` boolean DEFAULT 1,
-                `departament_id` int(11) NOT NULL,
+                `department_id` int(11) NOT NULL,
                 PRIMARY KEY (`id`)
             ) ENGINE=innoDB DEFAULT CHARSET=utf8"
         );

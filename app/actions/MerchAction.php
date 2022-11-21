@@ -7,7 +7,6 @@ use helpers\ReturnedResponse;
 use helpers\Server;
 use models\Merch;
 use models\Purchases;
-use models\Stimulus;
 use models\User;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;

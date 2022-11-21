@@ -5,8 +5,11 @@ namespace actions;
 use helpers\ReturnedResponse;
 use models\Achievement;
 use models\AchievementGroup;
+use models\Bonus;
+use models\User;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Respect\Validation\Validator;
 
 class AchievementAction extends Action
 {
@@ -28,19 +31,46 @@ class AchievementAction extends Action
             if ($achievement->challenge_id) {
                 continue;
             }
-            $group = $this->db->table((new AchievementGroup())->getTable())
-                ->get()->where('id', $achievement->group_id)->shift();
-            $achievementParse[] = [
-                'id' => $achievement->id,
-                'name' => $achievement->name,
-                'groupId' => $achievement->group_id ?: '',
-                'group' => $group ? $group->name : '',
-                'min' => $achievement->min_price ?: '',
-                'max' => $achievement->max_price ?: '',
-                //TODO
-                'icon' => 'https://www.awicons.com/stock-icons/symbol-black/preview/gallery.png',
-            ];
+            $achievementParse[] = $this->formatAchievement($achievement);
         }
         return $returnResponse->successResponse($achievementParse);
+    }
+
+    public function accrueBonuses(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $attributes = $rules = [];
+        $achievementId = $request->getParam('achievementId');
+        $achievement = $this->db->table((new Achievement())->getTable())
+            ->get()->where('id', $achievementId)->shift();
+        if (!$achievement) {
+            return $returnResponse->errorsResponse(['Достижение не найдено']);
+        }
+        //TODO сделать проверку токена
+        $rules['achievement_id'] = Validator::noWhitespace()->intVal();
+        $attributes['achievement_id'] = $achievementId;
+        $attributes['sum'] = $request->getParam('sum');
+        $rules['sum'] = Validator::noWhitespace()->intVal()->min($achievement->min_price);
+        if ($achievement->max_price) {
+            $rules['sum'] = $rules['sum']->max($achievement->max_price);
+        } else {
+            $rules['sum'] = $rules['sum']->max($achievement->min_price);
+        }
+        $userId = $request->getParam('userId');
+        $user = $this->db->table((new User())->getTable())
+            ->get()->where('id', $userId)->shift();
+        if (!$user) {
+            return $returnResponse->errorsResponse(['Пользователь не найден']);
+        }
+        $rules['user_id'] = Validator::noWhitespace()->intVal();
+        $attributes['user_id'] = $userId;
+        if ($errors = $this->validator->validate($attributes, $rules)) {
+            return $returnResponse->errorsResponse($errors);
+        }
+        $bonus = new Bonus();
+        $bonus->fill($attributes);
+        return $bonus->save()
+            ? $returnResponse->successResponse()
+            : $returnResponse->saveErrorResponse();
     }
 }

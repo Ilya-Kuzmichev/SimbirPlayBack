@@ -4,13 +4,10 @@ namespace actions;
 
 use helpers\ReturnedResponse;
 use helpers\Server;
-use models\Departament;
-use models\Stimulus;
 use models\User;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-use Slim\Http\Uri;
 
 class RatingAction
 {
