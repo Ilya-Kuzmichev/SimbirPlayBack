@@ -36,6 +36,7 @@ class Action
             ];
         }
         return [
+            'id' => $challenge->id,
             'name' => $challenge->name,
             'description' => $challenge->description,
             'startDate' => date('d.m.Y', strtotime($challenge->start_date)),

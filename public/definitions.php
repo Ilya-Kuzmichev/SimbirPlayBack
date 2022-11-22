@@ -39,6 +39,7 @@ $app->post('/user/authentication', \actions\UserAction::class . ':authentication
 $app->post('/user/search', \actions\UserAction::class . ':search');
 $app->get('/user/list', \actions\UserAction::class . ':list');
 $app->get('/user/info/{id}', \actions\UserAction::class . ':info');
+$app->post('/user/update', \actions\UserAction::class . ':update');
 
 $app->get('/achievement/group-list', \actions\AchievementAction::class . ':groupList');
 $app->get('/achievement/list', \actions\AchievementAction::class . ':list');

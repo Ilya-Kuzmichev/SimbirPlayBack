@@ -6,6 +6,7 @@ use helpers\ReturnedResponse;
 use helpers\Server;
 use models\Achievement;
 use models\Challenge;
+use models\Department;
 use models\Merch;
 use models\Purchases;
 use models\User;
@@ -44,9 +45,15 @@ class UserAction extends Action
         if (mb_strlen($name, 'UTF-8') < 3) {
             return $returnResponse->errorResponse('Строка менее 3 символов');
         }
+        $departmentList = Department::getList();
         $users = $this->db->table((new User())->getTable())
             ->where('name', 'LIKE', "{$name}%")->orWhere('surname', 'LIKE', "{$name}%")
-            ->get(['id', 'name', 'surname'])->all();
+            ->get(['id', 'name', 'surname', 'department_id'])->all();
+        foreach ($users as $index => $user) {
+            $users[$index] = (array)$user;
+            //TODO
+            $users[$index]['department'] = $departmentList[(int)$user->department_id] ?? $departmentList[1];
+        }
         return $returnResponse->successResponse($users);
     }
 
@@ -67,7 +74,7 @@ class UserAction extends Action
         $id = $args['id'] ?? null;
         $user = $this->db->table((new User())->getTable())->where('id', $id)->get()->shift();
         if (empty($user)) {
-            return $returnResponse->errorResponse('Такого пользователя не существует');
+            return $returnResponse->errorResponse('Пользователь не существует');
         }
 //        $tableMerch = (new Merch())->getTable();
 //        $tablePurchases = (new Purchases())->getTable();
@@ -100,5 +107,18 @@ class UserAction extends Action
             'achievements' => $achievementParse,
             'challenges' => $challengeParse,
         ]);
+    }
+
+    public function update(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $token = $request->getParam('token');
+        $user = $this->db->table((new User())->getTable())
+            ->where('token', $token)->all();
+        if (empty($user)) {
+            return $returnResponse->errorResponse('Пользователь не существует');
+        }
+        
+        return $returnResponse->successResponse();
     }
 }

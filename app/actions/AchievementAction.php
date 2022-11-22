@@ -50,11 +50,13 @@ class AchievementAction extends Action
         $rules['achievement_id'] = Validator::noWhitespace()->intVal();
         $attributes['achievement_id'] = $achievementId;
         $attributes['sum'] = $request->getParam('sum');
-        $rules['sum'] = Validator::noWhitespace()->intVal()->min($achievement->min_price);
-        if ($achievement->max_price) {
-            $rules['sum'] = $rules['sum']->max($achievement->max_price);
-        } else {
-            $rules['sum'] = $rules['sum']->max($achievement->min_price);
+        if ($achievement->min_price) {
+            $rules['sum'] = Validator::noWhitespace()->intVal()->min($achievement->min_price);
+            if ($achievement->max_price) {
+                $rules['sum'] = $rules['sum']->max($achievement->max_price);
+            } else {
+                $rules['sum'] = $rules['sum']->max($achievement->min_price);
+            }
         }
         $userId = $request->getParam('userId');
         $user = $this->db->table((new User())->getTable())
