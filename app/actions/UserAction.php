@@ -5,6 +5,8 @@ namespace actions;
 use helpers\ReturnedResponse;
 use helpers\Server;
 use models\Achievement;
+use models\AchievementToChallenge;
+use models\Bonus;
 use models\Challenge;
 use models\Department;
 use models\Merch;
@@ -70,36 +72,29 @@ class UserAction extends Action
         if (empty($user)) {
             return $returnResponse->errorResponse('Пользователь не существует');
         }
-//        $tableMerch = (new Merch())->getTable();
-//        $tablePurchases = (new Purchases())->getTable();
-//        $stimulus = [];//$this->container['db']::select("SELECT p.name, s.balls, s.comment, DATE_FORMAT(s.date, '%d.%m.%Y') AS date FROM {$tableStimulus} s INNER JOIN {$tablePromo} p ON s.promo_id = p.id WHERE s.user_id = {$id} ORDER BY s.date");
-//        $purchases = $this->container['db']::select("SELECT m.name, p.price FROM {$tablePurchases} p INNER JOIN {$tableMerch} m ON p.merch_id = m.id WHERE p.user_id = {$id}");
-//        $totalRating = 0;
-//        $totalBalance = $totalRating;
-//        foreach ($purchases as $purchase) {
-//            $totalBalance -= (int)$purchase->price;
-//        }
         $challengeParse = $achievementParse = [];
         $challenges = $this->db->table((new Challenge())->getTable())->get()->where('responsible_id', $id)->all();
         foreach ($challenges as $challenge) {
             $challengeParse[] = $this->formatChallenge($challenge);
         }
-        $achievements = $this->db->table((new Achievement())->getTable())->get()->all();
-        foreach ($achievements as $achievement) {
-            $achievementParse[] = [
-                'name' => $achievement->name,
-                'price' => 100,
-                'date' => '20.11.2022',
-                'challenge' => 'Челлендж',
-            ];
-        }
-//        $tableBonus = (new Bonus())->getTable();
-//        $balance = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id}")->shift();
+        $tableAchievement = (new Achievement())->getTable();
+        $tableBonus = (new Bonus())->getTable();
+        $tableChallengeAchievement = (new AchievementToChallenge())->getTable();
+        $tableChallenge = (new Challenge())->getTable();
+        $achievementParse = $this->db::select("SELECT a.id, b.bonus, b.date, a.name,
+       (SELECT c.name FROM {$tableChallenge} c WHERE c.id = ca.challenge_id) as challenge
+                FROM {$tableBonus} b
+                    INNER JOIN {$tableAchievement} a ON b.achievement_id = a.id
+                    JOIN {$tableChallengeAchievement} ca ON ca.achievement_id = a.id
+                WHERE b.user_id = " . $id);
+        $bonus = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id}");
+        $rating = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id} AND bonus > 0");
         return $returnResponse->successResponse([
             'name' => $user->name,
             'surname' => $user->surname,
             'avatar' => (new Server())->getHost() . '/images/user/' . $user->id . '.jpg',
-            'balance' => 120,
+            'rating' => $rating ? array_shift($rating)->bonus : 0,
+            'bonus' => $bonus ? array_shift($bonus)->bonus : 0,
             'achievements' => $achievementParse,
             'challenges' => $challengeParse,
             'shareAchievement' => (boolean)$user->share_achievement,

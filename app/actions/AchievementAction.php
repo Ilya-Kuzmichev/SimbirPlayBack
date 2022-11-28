@@ -29,8 +29,7 @@ class AchievementAction extends Action
     {
         $returnResponse = new ReturnedResponse($response);
         $achievementParse = [];
-        $achievements = $this->db->table((new Achievement())->getTable())
-            ->get(['id', 'name', 'group_id', 'min_price', 'max_price'])->all();
+        $achievements = $this->db->table((new Achievement())->getTable())->get()->all();
         foreach ($achievements as $achievement) {
             $achievementParse[] = $this->formatAchievement($achievement);
         }
@@ -59,15 +58,16 @@ class AchievementAction extends Action
             return $returnResponse->errorsResponse(['Достижение не найдено']);
         }
         //TODO сделать проверку токена
+        //responsible_id
         $rules['achievement_id'] = Validator::noWhitespace()->intVal();
         $attributes['achievement_id'] = $achievementId;
-        $attributes['sum'] = $request->getParam('sum');
+        $attributes['bonus'] = $request->getParam('sum');
         if ($achievement->min_price) {
-            $rules['sum'] = Validator::noWhitespace()->intVal()->min($achievement->min_price);
+            $rules['bonus'] = Validator::noWhitespace()->intVal()->min($achievement->min_price);
             if ($achievement->max_price) {
-                $rules['sum'] = $rules['sum']->max($achievement->max_price);
+                $rules['bonus'] = $rules['bonus']->max($achievement->max_price);
             } else {
-                $rules['sum'] = $rules['sum']->max($achievement->min_price);
+                $rules['bonus'] = $rules['bonus']->max($achievement->min_price);
             }
         }
         $userId = $request->getParam('userId');

@@ -11,5 +11,5 @@ class Bonus extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['user_id', 'giver_id', 'responsible_id'];
+    protected $fillable = ['user_id', 'responsible_id', 'bonus', 'achievement_id'];
 }
