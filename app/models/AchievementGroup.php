@@ -11,5 +11,5 @@ class AchievementGroup extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'image'];
 }

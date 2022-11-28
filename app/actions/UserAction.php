@@ -22,7 +22,8 @@ class UserAction extends Action
         $login = $request->getParam('login');
         $password = $request->getParam('password');
         $user = $this->db->table((new User())->getTable())->where('login', $login)
-            ->get(['id', 'name', 'surname', 'password', 'role_id', 'token'])->shift();
+            ->get(['id', 'name', 'surname', 'password', 'role_id', 'token', 'share_achievement', 'share_rating'])
+            ->shift();
         if (empty($user)) {
             return $returnResponse->errorResponse('Неправильный логин или пароль');
         }
@@ -35,36 +36,29 @@ class UserAction extends Action
             'surname' => $user->surname,
             'token' => $user->token,
             'isAdmin' => $user->role_id == User::ROLE_ADMIN,
+            'shareAchievement' => (boolean)$user->share_achievement,
+            'shareRating' => (boolean)$user->share_rating,
         ]);
     }
 
     public function search(Request $request, Response $response, $args)
     {
         $returnResponse = new ReturnedResponse($response);
-        $name = $request->getParam('name');
-        if (mb_strlen($name, 'UTF-8') < 3) {
-            return $returnResponse->errorResponse('Строка менее 3 символов');
-        }
         $departmentList = Department::getList();
-        $users = $this->db->table((new User())->getTable())
-            ->where('name', 'LIKE', "{$name}%")->orWhere('surname', 'LIKE', "{$name}%")
-            ->get(['id', 'name', 'surname', 'department_id'])->all();
+        $users = $this->db->table((new User())->getTable());
+        if ($name = $request->getParam('name')) {
+            $users = $users->where(function ($query) use ($name) {
+                $query->where('name', 'LIKE', "{$name}%")->orWhere('surname', 'LIKE', "{$name}%");
+            });
+        }
+        if ($departmentId = $request->getParam('departmentId')) {
+            $users = $users->where('department_id', $departmentId);
+        }
+        $users = $users->get(['id', 'name', 'surname', 'patronymic', 'department_id as departmentId'])->all();
         foreach ($users as $index => $user) {
             $users[$index] = (array)$user;
-            //TODO
-            $users[$index]['department'] = $departmentList[(int)$user->department_id] ?? $departmentList[1];
+            $users[$index]['department'] = $departmentList[(int)$user->departmentId] ?? $departmentList[1];
         }
-        return $returnResponse->successResponse($users);
-    }
-
-    public function list(Request $request, Response $response, $args)
-    {
-        $returnResponse = new ReturnedResponse($response);
-        $dbRequest = $this->db->table((new User())->getTable());
-        if ($departmentId = $request->getParam('departmentId')) {
-            $dbRequest = $dbRequest->where('department_id', $departmentId);
-        }
-        $users = $dbRequest->get(['id', 'name', 'surname'])->all();
         return $returnResponse->successResponse($users);
     }
 
@@ -99,6 +93,8 @@ class UserAction extends Action
                 'challenge' => 'Челлендж',
             ];
         }
+//        $tableBonus = (new Bonus())->getTable();
+//        $balance = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id}")->shift();
         return $returnResponse->successResponse([
             'name' => $user->name,
             'surname' => $user->surname,
@@ -106,19 +102,33 @@ class UserAction extends Action
             'balance' => 120,
             'achievements' => $achievementParse,
             'challenges' => $challengeParse,
+            'shareAchievement' => (boolean)$user->share_achievement,
+            'shareRating' => (boolean)$user->share_rating,
         ]);
     }
 
     public function update(Request $request, Response $response, $args)
     {
         $returnResponse = new ReturnedResponse($response);
-        $token = $request->getParam('token');
+        //TODO переделать на токен
+        $id = $args['id'] ?? null;
         $user = $this->db->table((new User())->getTable())
-            ->where('token', $token)->all();
+            ->get()->where('id', $id)->shift();
         if (empty($user)) {
             return $returnResponse->errorResponse('Пользователь не существует');
         }
-        
-        return $returnResponse->successResponse();
+        $attributes = [];
+        $shareAchievement = $request->getParam('shareAchievement');
+        $shareRating = $request->getParam('shareRating');
+        if ($shareAchievement !== null) {
+            $attributes['share_achievement'] = $shareAchievement ? 1 : 0;
+        }
+        if ($shareRating !== null) {
+            $attributes['share_rating'] = $shareRating ? 1 : 0;
+        }
+        if ($this->db->table((new User())->getTable())->where('id', $id)->update($attributes)) {
+            return $returnResponse->successResponse();
+        }
+        return $returnResponse->saveErrorResponse();
     }
 }

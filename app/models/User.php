@@ -11,5 +11,5 @@ class User extends Model
 
     protected $table = 'user';
 
-    protected $fillable = ['login'];
+    protected $fillable = ['login', 'share_achievement', 'share_rating'];
 }

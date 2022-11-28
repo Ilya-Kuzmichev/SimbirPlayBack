@@ -36,13 +36,14 @@ $app->get('/rating', \actions\RatingAction::class . ':list');
 $app->get('/department/list', \actions\DepartmentAction::class . ':list');
 
 $app->post('/user/authentication', \actions\UserAction::class . ':authentication');
-$app->post('/user/search', \actions\UserAction::class . ':search');
+$app->get('/user/search', \actions\UserAction::class . ':search');
 $app->get('/user/list', \actions\UserAction::class . ':list');
 $app->get('/user/info/{id}', \actions\UserAction::class . ':info');
-$app->post('/user/update', \actions\UserAction::class . ':update');
+$app->post('/user/update/{id}', \actions\UserAction::class . ':update');
 
 $app->get('/achievement/group-list', \actions\AchievementAction::class . ':groupList');
 $app->get('/achievement/list', \actions\AchievementAction::class . ':list');
+$app->get('/achievement/info/{id}', \actions\AchievementAction::class . ':info');
 $app->post('/achievement/accrue-bonuses', \actions\AchievementAction::class . ':accrueBonuses');
 
 $app->get('/merch/list', \actions\MerchAction::class . ':list');
@@ -51,18 +52,15 @@ $app->post('/merch/buy/{id}', \actions\MerchAction::class . ':buy');
 
 $app->get('/challenge/list', \actions\ChallengeAction::class . ':list');
 $app->get('/challenge/info/{id}', \actions\ChallengeAction::class . ':info');
-$app->post('/challenge/create', \actions\ChallengeAction::class . ':create');
 
-$app->post('/admin/achievement/create-group', \actions\admin\AchievementAction::class . ':createGroup');
-$app->post('/admin/achievement/create', \actions\admin\AchievementAction::class . ':create');
+$app->post('/challenge/create', \actions\admin\ChallengeAction::class . ':create');
+$app->post('/achievement/create-group', \actions\admin\AchievementAction::class . ':createGroup');
+$app->post('/achievement/create', \actions\admin\AchievementAction::class . ':create');
 
 $app->options('/user/authentication', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
 $app->options('/achievement/accrue-bonuses', function (Request $request, Response $response, $args) {
-    ReturnedResponse::responseForOptionsRequest();
-});
-$app->options('/user/search', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
 $app->options('/merch/create', function (Request $request, Response $response, $args) {
@@ -71,9 +69,15 @@ $app->options('/merch/create', function (Request $request, Response $response, $
 $app->options('/merch/buy/{id}', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/admin/achievement/create', function (Request $request, Response $response, $args) {
+$app->options('/achievement/create', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });
-$app->options('/admin/achievement/create-group', function (Request $request, Response $response, $args) {
+$app->options('/achievement/create-group', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/challenge/create', function (Request $request, Response $response, $args) {
+    ReturnedResponse::responseForOptionsRequest();
+});
+$app->options('/user/update/{id}', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();
 });

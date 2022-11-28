@@ -19,7 +19,6 @@ final class Create_table_achievement extends AbstractMigration
         $this->execute("CREATE TABLE `{$table}` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `name` varchar(255) NOT NULL,
-                `challenge_id` int(11),
                 `group_id` int(2),
                 `min_price` int(11),
                 `max_price` int(11),

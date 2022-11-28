@@ -2,10 +2,10 @@
 
 namespace actions\admin;
 
+use helpers\Image;
 use helpers\ReturnedResponse;
 use models\Achievement;
 use models\AchievementGroup;
-use models\Challenge;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Respect\Validation\Validator;
@@ -18,6 +18,11 @@ class AchievementAction extends AdminAction
         $attributes = [
             'name' => $request->getParam('name'),
         ];
+        if ($imageBase64 = $request->getParam('image')) {
+            if ($picture = (new Image())->base64ToImage($imageBase64, $this->container->uploadDir . 'achievement/')) {
+                $attributes['image'] = $picture;
+            }
+        }
         $group = new AchievementGroup();
         if ($errors = $this->container->validator->validate($attributes, [
             'name' => Validator::notEmpty()->stringType()->length(1, 255),
@@ -26,7 +31,11 @@ class AchievementAction extends AdminAction
         }
         $group->fill($attributes);
         if ($group->save()) {
-            return $returnResponse->successResponse();
+            return $returnResponse->successResponse([
+                'id' => $group->id,
+                'name' => $group->name,
+                'image' => $group->image,
+            ]);
         }
         return $returnResponse->saveErrorResponse();
     }
@@ -39,19 +48,15 @@ class AchievementAction extends AdminAction
             'min_price' => $request->getParam('min'),
             'max_price' => $request->getParam('max'),
         ];
+        if ($imageBase64 = $request->getParam('image')) {
+            if ($picture = (new Image())->base64ToImage($imageBase64, $this->container->uploadDir . 'achievement/')) {
+                $attributes['image'] = $picture;
+            }
+        }
         $achievement = new Achievement();
         $rules = [
             'name' => Validator::notEmpty()->stringType()->length(1, 255),
         ];
-        if ($challengeId = $request->getParam('challengeId')) {
-            $challenge = $this->db->table((new Challenge())->getTable())
-                ->get()->where('id', $challengeId)->shift();
-            if (!$challenge) {
-                return $returnResponse->errorsResponse(['Челленджа не существует']);
-            }
-            $rules['challenge_id'] = Validator::noWhitespace()->intVal();
-            $attributes['challenge_id'] = $challengeId;
-        }
         if ($groupId = $request->getParam('groupId')) {
             $group = $this->db->table((new AchievementGroup())->getTable())
                 ->get()->where('id', $groupId)->shift();
@@ -66,7 +71,9 @@ class AchievementAction extends AdminAction
         }
         $achievement->fill($attributes);
         if ($achievement->save()) {
-            return $returnResponse->successResponse();
+            return $returnResponse->successResponse([
+                'id' => $achievement->id,
+            ]);
         }
         return $returnResponse->saveErrorResponse();
     }

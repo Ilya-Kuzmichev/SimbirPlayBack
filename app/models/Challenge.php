@@ -11,5 +11,5 @@ class Challenge extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'budget', 'responsible_id'];
+    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'budget', 'responsible_id', 'image'];
 }

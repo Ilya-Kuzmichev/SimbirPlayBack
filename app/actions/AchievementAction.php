@@ -3,6 +3,7 @@
 namespace actions;
 
 use helpers\ReturnedResponse;
+use helpers\Server;
 use models\Achievement;
 use models\AchievementGroup;
 use models\Bonus;
@@ -17,7 +18,10 @@ class AchievementAction extends Action
     public function groupList(Request $request, Response $response, $args)
     {
         $returnResponse = new ReturnedResponse($response);
-        $groups = $this->db->table((new AchievementGroup())->getTable())->get(['id', 'name'])->all();
+        $groups = $this->db->table((new AchievementGroup())->getTable())->get(['id', 'name', 'image'])->all();
+        foreach ($groups as $index => $group) {
+            $groups[$index]->image = $groups[$index]->image ? (new Server())->getHost() . '/images/achievement/' . $groups[$index]->image : '';
+        }
         return $returnResponse->successResponse($groups);
     }
 
@@ -26,14 +30,22 @@ class AchievementAction extends Action
         $returnResponse = new ReturnedResponse($response);
         $achievementParse = [];
         $achievements = $this->db->table((new Achievement())->getTable())
-            ->get(['id', 'name', 'challenge_id', 'group_id', 'min_price', 'max_price'])->all();
+            ->get(['id', 'name', 'group_id', 'min_price', 'max_price'])->all();
         foreach ($achievements as $achievement) {
-            if ($achievement->challenge_id) {
-                continue;
-            }
             $achievementParse[] = $this->formatAchievement($achievement);
         }
         return $returnResponse->successResponse($achievementParse);
+    }
+
+    public function info(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $id = $args['id'] ?? null;
+        $achievement = $this->db->table((new Achievement())->getTable())->where('id', $id)->get()->shift();
+        if (empty($achievement)) {
+            return $returnResponse->errorResponse('Такого достижения не существует');
+        }
+        return $returnResponse->successResponse($this->formatAchievement($achievement));
     }
 
     public function accrueBonuses(Request $request, Response $response, $args)

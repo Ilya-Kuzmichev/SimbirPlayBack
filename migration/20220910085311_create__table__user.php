@@ -14,6 +14,7 @@ final class Create_table_user extends AbstractMigration
                 `external_id` int(11) NOT NULL,
                 `name` varchar(255) NOT NULL,
                 `surname` varchar(255) NOT NULL,
+                `patronymic` varchar(255),
                 `login` varchar(255) NOT NULL,
                 `password` varchar(255) NOT NULL,
                 `email` varchar(255),
