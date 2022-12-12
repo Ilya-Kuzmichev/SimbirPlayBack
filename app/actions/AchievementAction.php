@@ -62,6 +62,9 @@ class AchievementAction extends Action
         $rules['achievement_id'] = Validator::noWhitespace()->intVal();
         $attributes['achievement_id'] = $achievementId;
         $attributes['bonus'] = $request->getParam('sum');
+        $tableBonus = (new Bonus())->getTable();
+//        $bonusRow = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE achievement_id = {$achievement->id}");
+//        $spentBalance += $bonusRow ? array_shift($bonusRow)->bonus : 0;
         if ($achievement->min_price) {
             $rules['bonus'] = Validator::noWhitespace()->intVal()->min($achievement->min_price);
             if ($achievement->max_price) {

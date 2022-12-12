@@ -47,15 +47,22 @@ class AchievementAction extends AdminAction
             'name' => $request->getParam('name'),
             'min_price' => $request->getParam('min'),
             'max_price' => $request->getParam('max'),
+            'description' => $request->getParam('description'),
         ];
         if ($imageBase64 = $request->getParam('image')) {
             if ($picture = (new Image())->base64ToImage($imageBase64, $this->container->uploadDir . 'achievement/')) {
                 $attributes['image'] = $picture;
             }
         }
+        if ($imageBase64 = $request->getParam('icon')) {
+            if ($picture = (new Image())->base64ToImage($imageBase64, $this->container->uploadDir . 'achievement/')) {
+                $attributes['icon'] = $picture;
+            }
+        }
         $achievement = new Achievement();
         $rules = [
             'name' => Validator::notEmpty()->stringType()->length(1, 255),
+            'description' => Validator::stringType()->length(0, 10000),
         ];
         if ($groupId = $request->getParam('groupId')) {
             $group = $this->db->table((new AchievementGroup())->getTable())
@@ -76,5 +83,31 @@ class AchievementAction extends AdminAction
             ]);
         }
         return $returnResponse->saveErrorResponse();
+    }
+
+    public function deleteGroup(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $id = $args['id'] ?? null;
+        $group = $this->db->table((new AchievementGroup())->getTable())->where('id', $id)->get()->shift();
+        if (empty($group)) {
+            return $returnResponse->errorResponse('Группа не существует');
+        }
+        //TODO проверить токен
+        $this->db->table((new AchievementGroup())->getTable())->where('id', $id)->delete();
+        return $returnResponse->successResponse();
+    }
+
+    public function delete(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $id = $args['id'] ?? null;
+        $achievement = $this->db->table((new Achievement())->getTable())->where('id', $id)->get()->shift();
+        if (empty($achievement)) {
+            return $returnResponse->errorResponse('Достижение не существует');
+        }
+        //TODO проверить токен
+        $this->db->table((new Achievement())->getTable())->where('id', $id)->delete();
+        return $returnResponse->successResponse();
     }
 }

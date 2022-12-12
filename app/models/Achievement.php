@@ -11,5 +11,5 @@ class Achievement extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['name', 'group_id', 'min_price', 'max_price', 'image'];
+    protected $fillable = ['name', 'description', 'group_id', 'min_price', 'max_price', 'image', 'icon'];
 }

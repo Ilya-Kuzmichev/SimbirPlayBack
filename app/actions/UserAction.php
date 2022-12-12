@@ -56,10 +56,13 @@ class UserAction extends Action
         if ($departmentId = $request->getParam('departmentId')) {
             $users = $users->where('department_id', $departmentId);
         }
-        $users = $users->get(['id', 'name', 'surname', 'patronymic', 'department_id as departmentId'])->all();
+        $users = $users
+            ->get(['id', 'name', 'surname', 'patronymic', 'department_id as departmentId', 'share_achievement as shareAchievement', 'share_rating as shareRating'])
+            ->all();
         foreach ($users as $index => $user) {
             $users[$index] = (array)$user;
             $users[$index]['department'] = $departmentList[(int)$user->departmentId] ?? $departmentList[1];
+            $users[$index]['avatar'] = (new Server())->getHost() . '/images/user/' . $user->id . '.jpg';
         }
         return $returnResponse->successResponse($users);
     }
@@ -87,14 +90,16 @@ class UserAction extends Action
                     INNER JOIN {$tableAchievement} a ON b.achievement_id = a.id
                     JOIN {$tableChallengeAchievement} ca ON ca.achievement_id = a.id
                 WHERE b.user_id = " . $id);
-        $bonus = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id}");
-        $rating = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id} AND bonus > 0");
+        $bonusRow = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id}");
+        $ratingRow = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$id} AND bonus > 0");
+        $bonus = $bonusRow ? array_shift($bonusRow)->bonus : 0;
+        $rating = $ratingRow ? array_shift($ratingRow)->bonus : 0;
         return $returnResponse->successResponse([
             'name' => $user->name,
             'surname' => $user->surname,
             'avatar' => (new Server())->getHost() . '/images/user/' . $user->id . '.jpg',
-            'rating' => $rating ? array_shift($rating)->bonus : 0,
-            'bonus' => $bonus ? array_shift($bonus)->bonus : 0,
+            'rating' => $rating,
+            'bonus' => $bonus,
             'achievements' => $achievementParse,
             'challenges' => $challengeParse,
             'shareAchievement' => (boolean)$user->share_achievement,

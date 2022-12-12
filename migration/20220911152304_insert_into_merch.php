@@ -11,20 +11,12 @@ final class Insert_into_merch extends AbstractMigration
         $merchTable = (new \models\Merch())->getTable();
         $merchList = [
             [
-                'name' => 'Майка',
-                'price' => 20,
-            ],
-            [
-                'name' => 'Толстовка',
+                'name' => 'Наушники',
                 'price' => 30,
             ],
             [
-                'name' => 'Чашка',
+                'name' => 'Стикеры',
                 'price' => 5,
-            ],
-            [
-                'name' => 'Рюкзак',
-                'price' => 15,
             ],
             [
                 'name' => 'Бутылка',

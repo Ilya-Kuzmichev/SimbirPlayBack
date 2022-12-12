@@ -56,6 +56,9 @@ $app->get('/challenge/info/{id}', \actions\ChallengeAction::class . ':info');
 $app->post('/challenge/create', \actions\admin\ChallengeAction::class . ':create');
 $app->post('/achievement/create-group', \actions\admin\AchievementAction::class . ':createGroup');
 $app->post('/achievement/create', \actions\admin\AchievementAction::class . ':create');
+$app->get('/achievement/delete-group/{id}', \actions\admin\AchievementAction::class . ':deleteGroup');
+$app->get('/achievement/delete/{id}', \actions\admin\AchievementAction::class . ':delete');
+$app->get('/challenge/delete/{id}', \actions\admin\ChallengeAction::class . ':delete');
 
 $app->options('/user/authentication', function (Request $request, Response $response, $args) {
     ReturnedResponse::responseForOptionsRequest();

@@ -6,7 +6,10 @@ use helpers\Server;
 use models\Achievement;
 use models\AchievementGroup;
 use models\AchievementToChallenge;
+use models\Bonus;
 use models\Challenge;
+use models\ChallengeDepartment;
+use models\Department;
 use models\User;
 use Psr\Container\ContainerInterface;
 
@@ -25,9 +28,11 @@ class Action
 
     protected function formatChallenge($challenge)
     {
+        $tableBonus = (new Bonus())->getTable();
         $responsible = $this->db->table((new User())->getTable())
             ->get()->where('id', $challenge->responsible_id)->shift();
-        $achievementParse = [];
+        $achievementParse = $departmentParse = [];
+        $spentBalance = 0;
         $achievementIds = $this->db->table((new AchievementToChallenge())->getTable())
             ->get()->where('challenge_id', $challenge->id)->all();
         foreach ($achievementIds as $achievementIdsRow) {
@@ -40,6 +45,17 @@ class Action
                     'min' => $achievement->min_price,
                     'max' => $achievement->max_price,
                 ];
+                $bonusRow = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE achievement_id = {$achievement->id}");
+                $spentBalance += $bonusRow ? array_shift($bonusRow)->bonus : 0;
+            }
+        }
+        $departmentIds = $this->db->table((new ChallengeDepartment())->getTable())
+            ->get()->where('challenge_id', $challenge->id)->all();
+        foreach ($departmentIds as $departmentIdsRow) {
+            $department = $this->db->table((new Department())->getTable())
+                ->get()->where('id', $departmentIdsRow->department_id)->shift();
+            if ($department) {
+                $departmentParse[] = $department->name;
             }
         }
         return [
@@ -48,10 +64,9 @@ class Action
             'description' => $challenge->description,
             'startDate' => date('d.m.Y', strtotime($challenge->start_date)),
             'endDate' => date('d.m.Y', strtotime($challenge->end_date)),
-            //TODO
             'achievements' => $achievementParse,
-            'balance' => 100,
-            'department' => 'Направление',
+            'balance' => $challenge->budget - $spentBalance,
+            'department' => implode(', ', $departmentParse),
             'image' => $challenge->image ? (new Server())->getHost() . '/images/challenge/' . $challenge->image : '',
             'responsible' => $responsible ? $responsible->name : null,
         ];
@@ -82,12 +97,14 @@ class Action
         return [
             'id' => $achievement->id,
             'name' => $achievement->name,
+            'description' => $achievement->description,
             'groupId' => $achievement->group_id ?: '',
             'group' => $group ? $group->name : '',
             'min' => $achievement->min_price ?: '',
             'max' => $achievement->max_price ?: '',
             'challenges' => $challengeParse,
             'image' => $achievement->image ? (new Server())->getHost() . '/images/achievement/' . $achievement->image : '',
+            'icon' => $achievement->icon ? (new Server())->getHost() . '/images/achievement/' . $achievement->icon : '',
         ];
     }
 }

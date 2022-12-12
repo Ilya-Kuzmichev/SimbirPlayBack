@@ -8,6 +8,8 @@ use helpers\ReturnedResponse;
 use models\Achievement;
 use models\AchievementToChallenge;
 use models\Challenge;
+use models\ChallengeDepartment;
+use models\Department;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Respect\Validation\Validator;
@@ -56,10 +58,36 @@ class ChallengeAction extends Action
                     $achievementToChallenge->save();
                 }
             }
+            $departmentIds = $request->getParam('departmentIds', []);
+            foreach ($departmentIds as $departmentId) {
+                $department = $this->db->table((new Department())->getTable())
+                    ->get('id')->where('id', $departmentId)->shift();
+                if ($department) {
+                    $challengeDepartment = new ChallengeDepartment();
+                    $challengeDepartment->fill([
+                        'challenge_id' => $challenge->id,
+                        'department_id' => $departmentId,
+                    ]);
+                    $challengeDepartment->save();
+                }
+            }
             return $returnResponse->successResponse([
                 'id' => $challenge->id,
             ]);
         }
         return $returnResponse->saveErrorResponse();
+    }
+
+    public function delete(Request $request, Response $response, $args)
+    {
+        $returnResponse = new ReturnedResponse($response);
+        $id = $args['id'] ?? null;
+        $challenge = $this->db->table((new Challenge())->getTable())->where('id', $id)->get()->shift();
+        if (empty($challenge)) {
+            return $returnResponse->errorResponse('Челлендж не существует');
+        }
+        //TODO проверить токен
+        $this->db->table((new Challenge())->getTable())->where('id', $id)->delete();
+        return $returnResponse->successResponse();
     }
 }

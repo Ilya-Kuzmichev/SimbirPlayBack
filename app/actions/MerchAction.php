@@ -5,6 +5,7 @@ namespace actions;
 use helpers\Image;
 use helpers\ReturnedResponse;
 use helpers\Server;
+use models\Bonus;
 use models\Merch;
 use models\Purchases;
 use models\User;
@@ -29,7 +30,7 @@ class MerchAction
         $returnResponse = new ReturnedResponse($response);
         $merchList = $this->db->table((new Merch())->getTable())->get(['id', 'name', 'price', 'picture'])->sortBy('price')->all();
         foreach ($merchList as $index => $merch) {
-            $merchList[$index]->picture = (new Server())->getHost() . '/images/merch/' . $merch->id . '.jpg';
+            $merchList[$index]->picture = (new Server())->getHost() . '/images/merch/' . $merch->id . '.png';
         }
         return $returnResponse->successResponse(array_values($merchList));
     }
@@ -72,33 +73,26 @@ class MerchAction
         if (!$this->db->table((new User())->getTable())->where('id', $userId)->get()->shift()) {
             return $returnResponse->errorResponse('Такого пользователя не существует');
         }
-        $tableStimulus = (new Stimulus())->getTable();
-        $tablePurchases = (new Purchases())->getTable();
-        $stimulusBalance = $this->db::select("SELECT SUM(balls) AS balls FROM {$tableStimulus} WHERE user_id = {$userId}");
-        $stimulusBalance = $stimulusBalance ? array_shift($stimulusBalance) : [];
-        $stimulusBalance = !empty($stimulusBalance->balls) ? (int)$stimulusBalance->balls : 0;
-
-        $purchasesBalance = $this->db::select("SELECT SUM(price) AS price FROM {$tablePurchases} WHERE user_id = {$userId}");
-        $purchasesBalance = $purchasesBalance ? array_shift($purchasesBalance) : [];
-        $purchasesBalance = !empty($purchasesBalance->price) ? (int)$purchasesBalance->price : 0;
-        $totalBalance = $stimulusBalance - $purchasesBalance;
-        if ($totalBalance < $merch->price) {
+        $tableBonus = (new Bonus())->getTable();
+        $bonus = $this->db::select("SELECT SUM(bonus) bonus FROM {$tableBonus} WHERE user_id = {$userId}");
+        if ($bonus < $merch->price) {
             return $returnResponse->errorResponse('Не хватает баланса для покупки мерча');
         }
         $attributes = [
             'user_id' => $userId,
             'merch_id' => $id,
             'price' => $merch->price,
-            'address' => $request->getParam('address'),
         ];
         $purchases = new Purchases();
-        if ($errors = $this->container->validator->validate($attributes, [
-            'address' => Validator::stringType()->notEmpty()->length(1, 255),
-        ])) {
-            return $returnResponse->errorsResponse($errors);
-        }
         $purchases->fill($attributes);
         if ($purchases->save()) {
+            $attributes = [
+                'user_id' => $userId,
+                'bonus' => -$merch->price,
+            ];
+            $bonus = new Bonus();
+            $bonus->fill($attributes);
+            $bonus->save();
             return $returnResponse->successResponse();
         }
         return $returnResponse->saveErrorResponse();
